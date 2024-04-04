@@ -105,9 +105,13 @@ sheep_density_rasters <- lapply( # remember our object is a list so we need to u
       mask = T )})# removing everything outside the polygon so it's not considered 
 
 
-ggplot() +
+map_nz <- ggplot() +
   geom_sf(data = merged_data, aes(fill = sheep_density_animals_per_km2_farmland)) +
-  scale_fill_gradient(name = "Sheep Density (sheep/km" ^ "2" * ")", low = "lightblue", high = "darkblue") +
+  scale_fill_gradient(name = expression("Sheep Density per km" ^ "2" * " of farmland"), 
+                      labels = scales::comma, 
+                      breaks = seq(0, 350, by = 50),
+                      low = "#C1E1C1", high = "darkgreen",
+                      n.breaks = 7) +
   labs(title = "Sheep Density in New Zealand") +
   
   # Defining the legend 
@@ -121,12 +125,12 @@ ggplot() +
   
   # Changing themes 
   theme_minimal() + # a R built in theme 
-  # theme minimal does not remove some of the grids so we'll do that mannually 
-  theme(axis.line = element_blank(), # remvoving lines 
+  # theme minimal does not remove some of the grids so we'll do that manually 
+  theme(axis.line = element_blank(), # removing lines 
         axis.title.x = element_blank(),axis.title.y = element_blank(), # removing x and y titles 
         axis.text.x = element_blank(),axis.text.y = element_blank(), # removing the latitudes, longitudes, and degrees on the x and y axis 
         legend.position = "right", # legend on the right 
-        # legend.title = element_text( # customising the legend title text 
+        # legend.title = element_text( # customizing the legend title text 
         #   size = 11, color = "grey10"),
         # legend.text = element_text(size = 10, color = "grey10"),
         # Making the background white so it's the same as in the rayshader package 

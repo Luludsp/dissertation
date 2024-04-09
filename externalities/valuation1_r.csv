@@ -1,0 +1,37 @@
+﻿study_id,year,country ,impact,type,subtype,id/ha
+1,1994,australia,supports earthworms,supporting,biodiversity ,-243.4
+2,2009,uk,herbage growth ,provisioning,herbage ,-813.34
+2,2009,uk,vegetation diversity ,supporting,biodiversity ,-941.14
+3,1999,uk,extractable organic N ,supporting ,nutrient cycling ,-2945.25
+3,1999,uk,herbage growth ,provisioning ,herbage ,-487.07
+3,1999,uk,P content herbage,provisioning,herbage ,-15.13
+3,1999,uk,soil basification ,supporting,nutrient uncycling ,192.1
+3,1999,uk,soil solution P,supporting,nutrient uncycling ,0
+4,1994,nz ,N2O emissions ,regulating,nitrous oxide emission,35.82
+5,2008,australia,leaching N,supporting ,nutrient uncycling ,0
+5,2008,australia,leaching P,supporting ,nutrient uncycling ,0
+5,2008,australia,nutrient N,supporting ,nutrient uncycling ,-12.99
+6,2013,uk,carbon emissions ,regulating,carbon emission,0
+7,2015,australia,"organic matter 
+",supporting ,nutrient cycling ,-2127.75
+7,2015,australia,soil acidification ,supporting ,aluminium toxicity ,13309.52
+8,1995,australia,soil structure reduction ,supporting ,soil structure ,333.53
+9,2011,nz ,supports earthworms,supporting ,biodiversity ,-264.71
+10,1993,australia,soil structure reduction ,supporting ,soil structure ,333.53
+11,2012,uk,carbon emissions ,regulating,carbon emission,8.58
+12,2014,uk,vegetation diversity ,supporting ,biodiversity ,-133.44
+13,2006,uk,nutrient N,supporting ,nutrient cycling ,-293.22
+13,2006,uk,nutrient P,supporting ,nutrient cycling ,-113.1
+14,2015,australia,carbon sequestration ,regulating,carbon sequestration ,-561.6
+15,2001,uk,supports bacteria ,supporting ,biodiversity ,-33.1
+16,1997,uk,vegetation diversity ,supporting ,biodiversity ,-554.02
+17,2014,uk,carbon sequestration  ,regulating,carbon storage,0
+18,2012,nz ,carbon sequestration  ,regulating,carbon storage,0
+19,2007,nz ,CH4 sequestration,regulating,methane storage,-0.74
+19,2007,nz ,N2O emissions ,regulating,nitrous oxide emission,38.98
+20,2004,nz ,leaching N,supporting ,nutrient uncycling ,0
+20,2004,nz ,leaching P,supporting ,nutrient uncycling ,0
+20,2004,nz ,runoff ,supporting ,loss of soil ,5624.87
+21,2000,uk,supports bacteria ,supporting ,biodiversity ,-68619.27
+22,2011,nz ,supports earthworms,supporting ,biodiversity ,-669
+23,2011,australia,supports ant fauna,supporting ,biodiversity ,-1.81E+11

@@ -1,0 +1,47 @@
+﻿study_id,year,country ,impact,difference_with_baseline,cause,type,subtype,quality_assessment,sign ,id_ha_yr,low ,high ,stocking_rate_sheep_ha,stocking_rate_sheep_ha,ecosystem,pasture_type,farming_management
+1,1994,australia,supports earthworms,"supports more earthworms in moderate amount of added manure
+compared to a lot of manure of no manure at all ",manure ,supporting,biodiversity ,okay,pos,-128.7804878,-121.7941352,-155.5481344,NA,NA,pasture,NA,NA
+2,2009,uk,vegetation diversity ,"vegetation diversity decrease compared to control
+decrease in weight of clover on offer = -201.74 kg GDM/ha",defoliation_treading_excreta_fertiliser ,supporting,biodiversity ,okay,pos,-590.327628,-449.4760339,-895.6760467,25,NA,pasture,ryegrass_whiteclover,lowland
+3,1999,uk,extractable organic N ,"extractable organic N increase compared to control 
+by 23.9 +/- 1.2",urine,supporting,nutrient_cycling ,okay,pos,-5.885264,-5.65488,-6.115648,3.2,10,peat,NA,upland
+3,1999,uk,soil basification ,soil basification compared to before sheep urine applied ,urine,supporting,soil_infertility,okay,neg,0.05944995,0.031424979,0.087474921,3.2,10,peat,NA,upland
+3,1999,uk,soil solution P,soil solution P increase compared to control ,urine,supporting ,nutrient_uncycling ,okay,neg,2.38E-11,1.99E-11,2.79E-11,3.2,NA,peat,NA,upland
+4,1994,nz ,N2O emissions ,N2O emissions ,defoliation_treading_excreta ,regulating,climate_intensification,okay,neg,13.153257,-9.536111325,55.31956358,380,600,pasture,ryegrass_whiteclover,NA
+5,2008,australia,leaching N,leaching N,fertiliser ,supporting ,nutrient_uncycling ,no_replication,neg,0.287230902,0.248699927,0.325761876,11,NA,pasture,ryegrass_whiteclover_phalaris,NA
+5,2008,australia,leaching P,leaching P,fertiliser ,supporting ,nutrient_uncycling ,no_replication,neg,1.71996E-06,1.4282E-06,2.02301E-06,11,NA,pasture,ryegrass_whiteclover_phalaris,NA
+5,2008,australia,nutrient N,nutrient N boost,fertiliser ,supporting ,nutrient_cycling ,no_replication,pos,-105.55776,-103.212032,-107.9034879,11,NA,pasture,ryegrass_whiteclover_phalaris,NA
+6,2013,uk,carbon emissions ,carbon emissions ,treading,regulating,climate_intensification,okay,neg,2.47816E-06,1.89579E-06,3.13487E-06,NA,NA,peat,NA,upland
+7,2015,australia,"organic matter 
+","organic matter accumulation 
+",fertiliser ,supporting ,nutrient_cycling ,no_replication,pos,-11.56554703,-6.058784125,-16.29665723,2.5,9.3,pasture,kangaroograss_wallabygrass,NA
+7,2015,australia,soil acidification ,soil acidification ,fertiliser ,supporting ,toxicity,no_replication,neg,243.3045333,164.9743514,334.433461,2.5,9.3,pasture,kangaroograss_wallabygrass,NA
+8,1995,australia,soil structure reduction ,soil structure reduction ,treading,supporting ,soil_structure ,okay,neg,172.0588236,162.5,181.6176471,8,NA,pasture,cyprus_barrel_medic_barleygrass_herbaceousweeds,NA
+9,2011,nz ,supports earthworms,"supports earthworms 
+but decrease compared to dairy-grazing ",defoliation_treading_excreta ,supporting ,biodiversity ,okay,pos,-95.16,23.17119889,-213.4911989,30,NA,NA,NA,NA
+10,1993,australia,soil structure reduction ,soil structure reduction ,treading,supporting ,soil_structure ,no_replication,neg,172.0588236,162.5,181.6176471,7,NA,dryland,NA,NA
+11,2012,uk,carbon emissions ,carbon emissions ,defoliation + treading + excreta,regulating,climate_intensification,okay,neg,7.779618,6.600888,8.958348,0.2,1.7,peat,NA,upland
+12,2014,uk,vegetation diversity ,"vegetation biodiversity enhance 
+more compared to the control ",hay cutting_grazing_lime_fertiliser,supporting ,biodiversity ,okay ,pos,-219.57,-207.3716667,-231.7683333,NA,NA,pasture,ryegrass,upland
+13,2006,uk,nutrient N,nutrient N boost,excreta,supporting ,nutrient_cycling ,okay,pos,-293.216,-282.744,-303.688,NA,NA,pasture,NA,hillfarming 
+13,2006,uk,nutrient P,nutrient P boost,excreta,supporting ,nutrient_cycling ,okay,pos,-33.92648648,-28.9372973,-38.91567568,NA,NA,pasture,NA,hillfarming 
+14,2015,australia,carbon sequestration ,"carbon sequestration 
+sequestration of 7% NSW or 10% for a less conservative soil organic C assumption",aforestattion,regulating,climate_mitigation,okay ,pos,-476.04375,-454.10625,-500.175,NA,NA,pasture,NA,NA
+14,2015,australia,carbon sequestration ,"carbon sequestration 
+sequestration 2% WA, or 2% for a less conservative soil organic C assumption",aforestattion,regulating,climate_mitigation,okay ,pos,-78.975,-68.00625,-87.75,NA,NA,pasture,NA,NA
+14,2015,australia,carbon sequestration ,"carbon sequestration 
+SA reduction 11% emissions ",aforestattion,regulating,climate_mitigation,okay ,pos,-6.58125,-2.19375,-13.1625,NA,NA,chenopod_shrublands,NA,NA
+15,2001,uk,supports microbes ,bacteria increase,defoliation_treading_excreta ,supporting ,biodiversity ,okay ,pos,-6.088023415,-5.188005048,-6.914777267,4,8,pasture,festuca_agrostis,lowland
+16,1997,uk,vegetation diversity ,vegetation biodiversity enhance,defoliation_treading_excreta ,supporting ,biodiversity ,okay ,pos,-407.1894163,-359.2122228,-534.4869059,8,NA,pasture,"lolium_perenne_agrostis_stolonifera_poa_spp
+",lowland
+17,2014,uk,carbon sequestration  ,"carbon sequestration reduction 
+compared to reduction control",defoliation_treading_excreta ,regulating,climate_mitigation,okay,pos,-9.45903E-08,-8.75392E-08,-3.35993E-07,2.7,NA,peat,NA,upland
+18,2012,nz ,carbon sequestration  ,soil C storage reduction compared to rainfall alone = 13.4 ± 0.8,irrigation ,regulating,climate_mitigation,okay,pos,-1.94695E-06,-1.60035E-06,-2.3128E-06,40,NA,pasture,ryegrass_whiteclover,NA
+19,2007,nz ,CH4 sequestration,less than the control ,defoliation_treading_excreta_fertiliser ,regulating,climate_mitigation,okay,pos,-1.6132608,-1.35992844,-1.5313374,16,18,pasture ,pasture ,NA
+19,2007,nz ,N2O emissions ,higher than for the control  ,defoliation_treading_excreta_fertiliser ,regulating,climate_intensification,okay,neg,37.436193,9.86494275,80.58899385,16,18,pasture ,pasture ,NA
+20,2004,nz ,leaching N,increase compared to pre-grazing period ,defoliation_treading_excreta ,supporting ,nutrient_uncycling ,no_replication,neg,7.741223086,6.904050092,8.57839608,750,NA,pasture,ryegrass_whiteclover,NA
+20,2004,nz ,leaching P,increased by a factor of 76 compared to before grazing (winter),defoliation_treading_excreta ,supporting ,nutrient_uncycling ,no_replication,neg,0.000252368,0.000237393,0.000268036,750,NA,pasture,ryegrass_whiteclover,NA
+20,2004,nz ,runoff ,increase compared to pre-grazing period ,defoliation_treading_excreta ,supporting ,soil_infertility,no_replication,neg,80.59140932,56.41398652,120.887114,750,NA,pasture,ryegrass_whiteclover,NA
+21,2000,uk,supports microbes ,increase compared to control ,urine,supporting ,biodiversity ,okay,pos,-12616.82845,-10388.31547,-14663.93301,3.2,10,peat,NA,upland
+22,2011,nz ,supports earthworms,increase compared to control ,irrigation ,supporting ,biodiversity ,okay,pos,-719.175,-505.095,-933.255,18,NA,pasture,ryegrass_whiteclover,NA
+23,2011,australia,supports ant fauna,no difference with control although shows composition disturance-not reflected in species abundance and diversity,defoliation,supporting ,biodiversity ,no_replication,pos,-31.75821886,-21.96364912,-39.2,NA,NA,chenopod_shrublands,NA,NA

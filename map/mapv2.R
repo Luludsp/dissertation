@@ -184,6 +184,9 @@ region_borders <- get_region_borders_l2()
 # looking up the name of the different regions in the UK 
 head(unique(region_borders$NAME_2))
 
+region_borders <- region_borders[complete.cases(region_borders), ]
+region_borders[!is.na(region_borders)]
+
 # renaming 
 uk <- region_borders
 

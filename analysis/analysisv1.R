@@ -8,18 +8,103 @@
 
 # loading libraries 
 library(tidyverse)
-
-
+library(nortest)
+library(colorspace)
+# other libraries? 
 
 # loading the data 
 data <- read.csv("analysis/compiled_data_impacts_externalities.csv", header = TRUE)
+head(data)
+str(data)
+
+# Converting the charcater values into factors 
+data <- data %>%
+  mutate(
+    impact = as.factor(impact), 
+    difference_with_baseline = as.factor(difference_with_baseline),
+    country = as.factor(country), 
+    cause = as.factor(cause),
+    type = as.factor(type), 
+    subtype = as.factor(subtype),
+    quality_assessment = as.factor(quality_assessment),
+    sign = as.factor(sign),
+    ecosystem = as.factor(ecosystem),
+    pasture_type = as.factor(pasture_type),
+    farming_management = as.factor(farming_management),
+         )
+
+
+## Data set without microbes values 
+
+# Rows containing the impact "supports microbes" 
+rows_to_remove <- c(23, 32) # rows 23 & 32 
+# Remove the specified rows
+data_not_mic <- data[-rows_to_remove, ] # creating a new data set without these rows 
+
+
+## Aesthetics 
+# Creating my palette from Manu package (they are inspired from pretty kiwi birds' plumage)
+birds <- c("#44781E", "#7D9D33", "#CED38C", "#DCC949", "#BCA888", "#CD8862", "#775B24", "#7A3520")
+
 
 ##### RQ1 
 # What are the different impacts between the three countries? How can they be categorized groups? 
 
-hist(data$impact)
+
+
+
+
 
 ##### RQ2 
+
+### Do the externalities between the three countries differ? 
+
+#  checking for normality 
+# visually 
+hist(data$id_ha_yr) # not normal at all 
+hist(data_not_mic$id_ha_yr) # looks like it could be normal 
+
+# test 
+shapiro.test(p_resids)
+
+#linear model 
+country_lm <- lm(id_ha_yr~country, data=data_not_mic)
+anova(country_lm)
+#summary of the function 
+summary(country_lm)
+
+p_resids <- resid(country_lm)
+#fct shapiro.test() used to test the normality of the residuals
+shapiro.test(p_resids)
+#fct bartlett.test() check equality of variances 
+bartlett.test(id_ha_yr ~ country,data= data_not_mic)
+plot(country_lm)
+
+wilcox.test(data_not_mic$country, data_not_mic$id_ha_yr)
+
+# summing externalities
+
+sum_externalities <- data_not_mic %>%
+  group_by(country) %>%
+  summarize(Sum_Externalities = sum(id_ha_yr))
+
+str(sum_externalities)
+
+# Perform Kruskal-Wallis test
+kruskal.test(sum_externalities ~ country, data = data_not_mic)
+
+# 
+
+plot <- ggplot(data_not_mic, aes(x = country, y = id_ha_yr)) +
+  geom_boxplot() +  # Add box plot
+  geom_errorbar(stat = "summary", fun.data = "mean_se", width = 0.2) +  # Add error bars for mean +/- SE
+  geom_jitter(aes(color = subtype), width = 0.2) +  # Add impact dots with color
+  scale_color_manual(values = birds) +  # Set color palette for impact dots
+  theme_minimal() +  # Apply a minimal theme
+  labs(x = "Country", y = "id_ha_yr", title = "Box Plot of id_ha_yr by Country")  # Add axis labels and title
+
+# Display the plot
+print(plot)
 
 # Making a Marginal abatement cost curve (MACC)
 
@@ -146,36 +231,14 @@ data$ranking <- rank(data$id_ha_yr, ties.method = "first")
 sorted_data <- data[order(abs(data$id_ha_yr)),]
 sorted_data$ranking <- seq_len(nrow(data))
 
-data_no_mic <- data %>%
-  filter(!(impact == "supports microbes"))
-data_no_mic <- data %>%
-  filter(impact != "supports microbes") %>%
-  filter(impact != "supports microbes")
 
-data_not_mic <- data[data$impact != "supports microbes", ]
-
-rows_to_remove <- c(23, 32)  # Replace row_number_1 and row_number_2 with the actual row numbers you want to remove
-
-# Remove the specified rows
-data_not_mic <- data[-rows_to_remove, ]
-
-data_not_mic <- data$impact
-
-data_not_mic %>%
-  macc_prep(mac = id_ha_yr, abatement = ranking) %>%
-  ggplot() +
-  geom_macc(fill = country)
-
+# MACC
 
 full_macc <- data_not_mic %>%
   ggmacc(abatement = ranking, mac = id_ha_yr, fill = subtype, cost_threshold = social_cost_of_carbon,
-         zero_line = TRUE, threshold_line = TRUE)
-
-full_macc
-
-full_macc +
+         zero_line = TRUE, threshold_line = TRUE) +
   scale_x_continuous(labels = scales::number_format()) +
-  scale_fill_manual(values = package) +
+  scale_fill_manual(values = birds) +
   labs(fill = "Impact",
        x = expression("Abatement (tonnes CO"[2]*"-eq)"),
        y = expression("Marginal abatement cost (GBP tonne CO"[2]*"-eq"^{-1}*")")
@@ -183,32 +246,7 @@ full_macc +
   theme_classic()
 
 
-# Define your initial color palette
-initial_palette <- c("#7D9D33", "#CED38C", "#DCC949", "#BCA888", "#CD8862", "#775B24")
 
-# Create a function to generate more colors based on the initial palette
-generate_palette <- function(initial_palette, n) {
-  ramp <- colorRamp(initial_palette)
-  colors <- ramp(seq(0, 1, length.out = n))
-  return(colors)
-}
 
-# Generate two additional colors that go well with the initial palette
-additional_colors <- generate_palette(initial_palette, 2)
-
-# Combine the initial palette with the additional colors
-final_palette <- c(initial_palette, additional_colors)
-
-# Create a vector with the names of the colors
-palette_names <- c("color1", "color2", "color3", "color4", "color5", "color6", "color7", "color8")
-
-# Create a named vector with the final palette
-palette_vector <- setNames(final_palette, palette_names)
-
-# Create a package with the palette
-package <- list(palette = palette_vector)
-
-# Print the package
-print(package)
 
 

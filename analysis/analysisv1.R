@@ -4,20 +4,23 @@
 # Lucie de Seguins Pazzis 
 # 12/04/2023
 
-##### PREPARATION
+# PREPARATION ####
 
 # loading libraries 
 library(tidyverse)
 library(nortest)
 library(colorspace)
+library(coin) # for the Kruskal-Wallis test 
+library(rstatix)
 # other libraries? 
+
 
 # loading the data 
 data <- read.csv("analysis/compiled_data_impacts_externalities.csv", header = TRUE)
 head(data)
 str(data)
 
-# Converting the charcater values into factors 
+# Converting the character values into factors 
 data <- data %>%
   mutate(
     impact = as.factor(impact), 
@@ -33,39 +36,93 @@ data <- data %>%
     farming_management = as.factor(farming_management),
          )
 
+# Cleaning the spaces 
+data <- data %>%
+  mutate(country = str_replace_all(country, "\\s+", ""),
+         subtype = str_replace_all(subtype, "\\s+", ""),
+         type = str_replace_all(type, "\\s+", ""),
+         ecosystem = str_replace_all(ecosystem, "\\s+", ""),
+         impact = str_replace_all(impact, "\\s+", ""))
 
+data_copy <- data
 ## Data set without microbes values 
+data_not_mic <- data %>%
+  filter(trimws(impact) != "supports microbes")
 
-# Rows containing the impact "supports microbes" 
-rows_to_remove <- c(23, 32) # rows 23 & 32 
-# Remove the specified rows
-data_not_mic <- data[-rows_to_remove, ] # creating a new data set without these rows 
-
-
-## Aesthetics 
+## Palettes 
 # Creating my palette from Manu package (they are inspired from pretty kiwi birds' plumage)
 birds <- c("#44781E", "#7D9D33", "#CED38C", "#DCC949", "#BCA888", "#CD8862", "#775B24", "#7A3520")
-
-
-##### RQ1 
-# What are the different impacts between the three countries? How can they be categorized groups? 
-
+countries <- c("nz" = "#6C803A", "uk" = "#7B5C34","australia" = "#CCAE42")
+impacts <- c("#7D9D33", "#CED38C", "#DCC949", "#BCA888", "#CD8862", "#775B24","#44781E", "#A1B654", "#CCAE42","#3E4331", "#AD6B17", "#66743B", "#D0C471", "#CCB62F", "#BAC4C2")
 
 
 
 
+# RQ1 ####
 
-##### RQ2 
+# 1.1 What are the different impact? How can they be categorized groups? ----
 
-### Do the externalities between the three countries differ? 
+# super_group_table 
+super_group_table <- data_copy %>%
+  group_by(study_id, type, subtype) %>%
+  summarise(impacts = list(impact))
 
-#  checking for normality 
+
+# bar chart with the different impacts and and how they are distributed among the types and stacked bar chart per country 
+
+
+data_grouped_study_id <- data_copy %>%
+  group_by(impact, country) %>%
+  summarise(study_count = n_distinct(study_id)) %>%
+  ungroup()
+
+# reorder factor 
+impact_order <- c("vegetationdiversity","supportsearthworms", "supportsmicrobes","supportsantfauna",
+                  "soilstructurereduction", "runoff",
+                  "leachingN", "leachingP", "soilsolutionP",
+                  "nutrientN", "extractableorganicN", "nutrientP", "organicmatter", 
+                  "soilacidification", "soilbasification", 
+                  "carbonsequestration", "N2Oemissions", "carbonemissions", "CH4sequestration")
+
+data_grouped_study_id$impact <- factor(data_grouped_study_id$impact, levels = impact_order)
+
+# stacked bar chart 
+barchart_citation_impact <- ggplot(data_grouped_study_id, aes(y=study_count, 
+                                                              x = impact, 
+                                                              fill= country,)) + 
+  geom_bar(position="stack", stat="identity", width = 0.7) +
+  scale_fill_manual(name = "Country",
+                    labels = c("Australia", "New Zealand", "United Kingdom"),
+                    values = countries) +
+  coord_flip() +
+  ylab("Study Count") +
+  xlab(NULL) +
+  theme_classic() +
+  theme(panel.grid.major.x = element_line(color = "black"),  # Vertical gridlines
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank()) 
+
+barchart_citation_impact
+
+
+# 1.2. How are they distributed among the countries? ====
+
+data_grouped_study_id_per_country <- data_copy %>%
+  group_by(impact, country) %>%
+  summarise(study_count_country = n_distinct(study_id)) %>%
+  ungroup()
+
+# 1.3. How old are the papers? by country? 
+
+
+
+# RQ2 ####
+
+#  Checking for normality ----
+
 # visually 
 hist(data$id_ha_yr) # not normal at all 
 hist(data_not_mic$id_ha_yr) # looks like it could be normal 
-
-# test 
-shapiro.test(p_resids)
 
 #linear model 
 country_lm <- lm(id_ha_yr~country, data=data_not_mic)
@@ -80,173 +137,391 @@ shapiro.test(p_resids)
 bartlett.test(id_ha_yr ~ country,data= data_not_mic)
 plot(country_lm)
 
-wilcox.test(data_not_mic$country, data_not_mic$id_ha_yr)
+# test 
+shapiro.test(p_resids) # not normal 
+
+
+### 2.1. What are the externalities between the countries ----
 
 # summing externalities
-
 sum_externalities <- data_not_mic %>%
   group_by(country) %>%
-  summarize(Sum_Externalities = sum(id_ha_yr))
+  summarize(sum_externalities = sum(id_ha_yr),
+            low_sum_externalities = sum(low),
+            high_sum_externalities = sum(high))
 
 str(sum_externalities)
 
-# Perform Kruskal-Wallis test
-kruskal.test(sum_externalities ~ country, data = data_not_mic)
+# visualisation 
+barchart_externalities_country <- ggplot(sum_externalities, aes(x = country, y = sum_externalities))+
+  geom_bar(data = sum_externalities, aes(y= sum_externalities), stat = "identity", width = 0.5, fill = "#CD8862", alpha = 0.7, position = "dodge") +  
+  geom_errorbar(data = sum_externalities, aes(ymin = low_sum_externalities, ymax = high_sum_externalities), width = 0.2) +  
+  geom_point(data = data_not_mic, aes(x = country, y = id_ha_yr), alpha = 0.5, position = position_jitter(width = 0.1)) +
+  geom_text(data = sum_externalities, aes(label = round(sum_externalities, 2), y = sum_externalities), vjust = 1.5, hjust = -0.35, size = 3.5) +
+  theme_minimal()+ 
+  theme(panel.grid.major = element_blank(),  # remove gridlines
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_text(size = 14, color = "black", hjust = 0.3),
+        axis.title.y = element_text(size = 14),
+        aspect.ratio = 2/1) +
+        scale_x_discrete(labels = c("australia" = "Australia", "uk" = "United Kingdom", "nz " = "New Zealand")) +  # something wrong with NZ 
+        ylab("International Dollar Per Hectare Per Year") +
+        xlab(NULL) 
 
-# 
+barchart_externalities_country
 
-plot <- ggplot(data_not_mic, aes(x = country, y = id_ha_yr)) +
+# Externalities per type 
+
+sum_externalities_country_type <- data_not_mic %>%
+  group_by(country, type) %>%
+  summarize(
+    id_ha_yr_sum = sum(id_ha_yr),
+    low_sum = sum(low),
+    high_sum = sum(high)
+  )
+
+# country   type       id_ha_yr_sum  low_sum high_sum
+# <chr>     <chr>             <dbl>    <dbl>    <dbl>
+#   1 australia regulating      -562.    -524.    -601.  
+# 2 australia supporting       310.     237.     379.  
+# 3 nz        regulating        49.0     -1.03   134.  
+# 4 nz        supporting      -726.    -419.   -1017.  
+# 5 uk        regulating         7.78     6.60     8.96
+# 6 uk        supporting     -1550.   -1333.   -2011.  
+
+## 1. regulating 
+sum_externalities_country_regulating <- sum_externalities_country_type[sum_externalities_country_type$type == "regulating", ]
+
+# test for significance 
+kruskal.test(id_ha_yr_sum ~ country, data = sum_externalities_country_regulating)
+# Kruskal-Wallis chi-squared = 2, df = 2, p-value = 0.3679
+
+## 2. supporting 
+sum_externalities_country_supporting <- sum_externalities_country_type[sum_externalities_country_type$type == "supporting", ]
+
+# test for significance 
+kruskal.test(id_ha_yr_sum ~ country, data = sum_externalities_country_supporting)
+# Kruskal-Wallis chi-squared = 2, df = 2, p-value = 0.3679
+
+### 2.2. Do the externalities between the three countries differ? - NO ----
+
+# testing if the sum of values differ among categories.
+# Using the Kruskal-wallis test - non-parametric alternative to ANOVA
+# Used to determine whether there are statistically significant differences between the medians of three or more independent groups
+kw_test_countries <- kruskal_test(id_ha_yr ~ country, data_not_mic)
+print(kw_test_countries) # chi-squared = 1.8805, df = 2, p-value = 0.3905
+
+# testing the difference between the two countries
+# 1. UK & AUS
+data_uk_aus <- data_not_mic %>%
+  filter(trimws(country) != "nz")
+head(data_uk_aus)
+kw_test_country_ukaus <- kruskal_test(id_ha_yr ~ country, data_uk_aus)
+print(kw_test_country_ukaus) # chi-squared = 0.64047, df = 1, p-value = 0.4235
+
+mwu_test_country_ukaus <- wilcox.test(id_ha_yr ~ country, data = data_uk_aus) # could not use the Wilcoxon rank sum test because we had ties in the data (two or more observations havnig the same value)
+print(mwu_test_country_ukaus) # W = 79, p-value = 0.4416
+
+# 2. UK & NZ 
+data_uk_nz <- data_not_mic %>%
+  filter(trimws(country) != "australia")
+head(data_uk_nz)
+kw_test_country_uknz <- kruskal_test(id_ha_yr ~ country, data_uk_nz)
+print(kw_test_country_uknz) # chi-squared = 1.9755, df = 1, p-value = 0.1599
+
+# 3. AUS & NZ
+data_aus_nz <- data_not_mic %>%
+  filter(trimws(country) != "uk")
+head(data_aus_nz)
+kw_test_country_ausnz <- kruskal_test(id_ha_yr ~ country, data_aus_nz)
+print(kw_test_country_ausnz) # chi-squared = 0.24764, df = 1, p-value = 0.6187
+
+## Do they differ between their costs and benefits 
+# 1. pos
+data_pos <- data_not_mic %>%
+  filter(sign == "pos")
+
+kw_test_countries_pos <- kruskal_test(id_ha_yr ~ country, data_pos)
+print(kw_test_countries_pos) # chi-squared = 0.37218, df = 2, p-value = 0.8302
+
+# 2. neg
+data_neg <- data_not_mic %>%
+  filter(sign == "neg")
+
+kw_test_countries_neg <- kruskal_test(id_ha_yr ~ country, data_neg)
+print(kw_test_countries_neg) # chi-squared = 3.5936, df = 2, p-value = 0.1658
+
+
+### 2.3. How are the externalities distributed for each countries according to each ecosystem services and subtypes ----
+
+# creating dataframe for the subtypes 
+sum_externalities_subtype <- data_not_mic %>%
+  group_by(country, subtype) %>%
+  summarize(sum_subtype = sum(id_ha_yr),
+            low_sum_subtype = sum(low),
+            high_sum_subtype = sum(high))
+
+str(sum_externalities_subtype)
+
+# 1. visualisation 1 - percentages of the subtypes for each country ====
+
+barchart_subtype <- ggplot(sum_externalities_subtype, aes(x = country,y = sum_subtype, fill = subtype)) +
+    geom_col(position = "fill")+ 
+    scale_fill_manual(name = "Subtype",
+                    values = birds) +
+    theme_minimal()
+
+barchart_subtype 
+
+# 2. visualisation 2 - still percentages but you also see the actual value for each ====
+
+# a. both positive and negative 
+ggplot(sum_externalities_subtype, aes(x = subtype, y = sum_subtype, fill = country)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(name = "Country",
+                    values = countries) +
+  theme_classic()
+
+# b. Positive externalities 
+sum_externalities_subtype_pos <- data_pos %>%
+  group_by(country, subtype) %>%
+  summarize(sum_subtype = sum(id_ha_yr),
+            low_sum_subtype = sum(low),
+            high_sum_subtype = sum(high))
+
+str(sum_externalities_subtype_pos)
+
+ggplot(sum_externalities_subtype_pos, aes(x = subtype, y = sum_subtype, fill = country)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(name = "Country",
+                    values = birds) +
+  theme_classic()
+
+# c. Negative externalities 
+sum_externalities_subtype_neg <- data_neg %>%
+  group_by(country, subtype) %>%
+  summarize(sum_subtype = sum(id_ha_yr),
+            low_sum_subtype = sum(low),
+            high_sum_subtype = sum(high))
+
+str(sum_externalities_subtype_neg)
+
+neg_subtype <- ggplot(sum_externalities_subtype_neg, aes(x = subtype, y = sum_subtype, fill = country)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(data = sum_externalities_subtype_neg, aes(ymin = low_sum_subtype, ymax = high_sum_subtype), position = position_dodge(width = 0.9), width = 0.25) +  
+  scale_fill_manual(name = "Country",
+                    values = countries) +
+  theme_classic() 
+
+# snapchot 
+sum_externalities_subtype_neg_snapchot <- data_neg %>%
+  group_by(country, subtype) %>%
+  filter(!(subtype %in% c("toxicity", "soil_structure"))) %>%
+  summarize(sum_subtype = sum(id_ha_yr),
+            low_sum_subtype = sum(low),
+            high_sum_subtype = sum(high))
+
+str(sum_externalities_subtype_neg_snapchot)
+
+neg_subtype_snapchot <- ggplot(sum_externalities_subtype_neg_snapchot, aes(x = subtype, y = sum_subtype, fill = country)) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(data = sum_externalities_subtype_neg_snapchot, aes(ymin = low_sum_subtype, ymax = high_sum_subtype), position = position_dodge(width = 0.9), width = 0.25) +  
+  scale_fill_manual(name = "Country",
+                    values = countries) +
+  theme_classic() 
+
+# testing ====
+# testing for negative etxternalities 
+kruskal_test_neg_subtype <- sum_externalities_subtype_neg %>%
+  group_by(country) %>%
+  kruskal_test(sum_subtype ~ subtype)
+
+print(kruskal_test_neg_subtype) # no significant difference in the distributions of the sum of externalities across subtypes for each country.
+
+# testing for positive etxternalities 
+kruskal_test_pos_subtype <- sum_externalities_subtype_pos %>%
+  group_by(country) %>%
+  kruskal_test(sum_subtype ~ subtype)
+
+print(kruskal_test_pos_subtype) # no significant difference in the distributions of the sum of externalities across subtypes for each country.
+
+# visualisation 3 - box plot of the externalities per country ====
+boxplot_ext_country <- ggplot(data_not_mic, aes(x = country, y = id_ha_yr)) +
   geom_boxplot() +  # Add box plot
-  geom_errorbar(stat = "summary", fun.data = "mean_se", width = 0.2) +  # Add error bars for mean +/- SE
   geom_jitter(aes(color = subtype), width = 0.2) +  # Add impact dots with color
   scale_color_manual(values = birds) +  # Set color palette for impact dots
   theme_minimal() +  # Apply a minimal theme
-  labs(x = "Country", y = "id_ha_yr", title = "Box Plot of id_ha_yr by Country")  # Add axis labels and title
+  labs(y = "Monetary Value in International Dollar per Hectare per Year") +  # Add axis labels and title
+  xlab("")
 
-# Display the plot
-print(plot)
+print(boxplot_ext_country)
 
-# Making a Marginal abatement cost curve (MACC)
+## visualisation 4 - making a Marginal Abatement Cost Curve (MACC) ====
 
-install.packages("devtools")
-devtools::install_github("aj-sykes92/ggmacc")
-
-
-social_cost_of_carbon <- 0
-
-full_macc <- uk_agroforestry %>%
-  ggmacc(abatement = co2_tyear, mac = mac_gbp_tco2, fill = crop, cost_threshold = social_cost_of_carbon,
-         zero_line = TRUE, threshold_line = TRUE, threshold_fade = 0.3)
-
-full_macc
-
-# install.packages("devtools")
-devtools::install_github("G-Thomson/Manu")
-
-full_macc +
-  scale_x_continuous(labels = scales::number_format()) +
-  scale_fill_manual(values = Manu::get_pal("Kea")) +
-  labs(title = "Marginal abatement cost curve for UK agroforestry",
-       fill = "Crop type",
-       x = expression("Abatement (tonnes CO"[2]*"-eq)"),
-       y = expression("Marginal abatement cost (GBP tonne CO"[2]*"-eq"^{-1}*")")
-  ) +
-  theme_classic()
-
-# install.packages("devtools")
-devtools::install_github("aj-sykes92/ggmacc")
-
-
-#' @title A marginal abatement cost curve geom
-#' @description A `ggplot2` geom with aesthetic mappings linked to the output of `macc_prep`. Add to
-#' a `ggplot` object to build a marginal abatement cost curve. A pre-parameterised wrapper for
-#' `geom_rect`.
-#' @param fill An optional parameter to specify fill groupings to be used by `geom_macc`.
-#' @param ... Any additional arguments to pass to `geom_rect`.
-#' @import ggplot2
-#' @export
-geom_macc <- function(fill = NULL, ...) {
-  geom_rect(
-    aes(xmin = .data$xmin,
-        xmax = .data$xmax,
-        ymin = .data$ymin,
-        ymax = .data$ymax,
-        fill = {{ fill }},
-    ),
-    ...)
-}
-
-ggmacc <- function(data, mac, abatement, fill = NULL, cost_threshold = NULL,
-                   zero_line = FALSE, threshold_line = FALSE, threshold_fade = 1) {
-  
-  # x-axis hline
-  if (zero_line == TRUE) {
-    zero_hline <- geom_hline(yintercept = 0, lty = 1, colour = "black")
-  } else {
-    zero_hline <- NULL
-  }
-  
-  # cost theshold hline
-  if (threshold_line == TRUE) {
-    if (is.null(cost_threshold)) abort("No cost threshold supplied.")
-    cost_hline <- geom_hline(yintercept = cost_threshold, lty = 2, colour = "black")
-  } else {
-    cost_hline <- NULL
-  }
-  
-  # prepare data for macc
-  data <-   data %>%
-    macc_prep(mac = {{ mac }}, abatement = {{ abatement }})
-  
-  # set threshold alpha
-  if (!is.null(cost_threshold)) {
-    alpha <- ifelse(pull(data, {{ mac }}) >= cost_threshold, threshold_fade, 1)
-  } else {
-    alpha <- rep(1, nrow(data))
-  }
-  
-  # plot
-  data %>%
-    ggplot() +
-    geom_macc(fill = {{ fill }}, alpha = alpha) +
-    zero_hline +
-    cost_hline
-}
-
-macc_prep <- function(data, mac, abatement) {
-  data %>%
-    arrange({{ mac }}) %>%
-    mutate(xmax = cumsum({{ abatement }}),
-           xmin = lag(.data$xmax, default = 0),
-           ymin = ifelse({{ mac }} < 0, {{ mac }}, 0),
-           ymax = ifelse({{ mac }} > 0, {{ mac }}, 0))
-}
-
-small_example %>%
-  macc_prep(mac = mac, abatement = abatement) %>%
-  ggplot() +
-  geom_macc(fill = cat)
-
-
-
-# okay so i need to rank them first and then i can organise them 
-
-
-# Assuming your dataframe is named 'data' and the column containing the values is named 'id_ha_yr'
-
+# Ranking the impacts depending on their benefit/cost
 # Create a new column for the rankings
-data$ranking <- rank(data$id_ha_yr)
+data_not_mic$ranking <- rank(data_not_mic$id_ha_yr)
 
-# If you want to sort the values before ranking, you can do it like this:
-sorted_data <- data[order(data$id_ha_yr),]
-sorted_data$ranking <- rank(sorted_data$id_ha_yr)
-
-# If you want the rankings to be from 1 to the number of values (lowest to highest),
-# you can use the option 'ties.method = "first"' in the rank() function
-data$ranking <- rank(data$id_ha_yr, ties.method = "first")
-
-# If you want the rankings to start from 1 for the lowest value and increase
-# sequentially to the highest value (both negative and positive),
-# you can do it like this:
-sorted_data <- data[order(abs(data$id_ha_yr)),]
-sorted_data$ranking <- seq_len(nrow(data))
-
+# Removing small values 
+data_without_small_values <- data_not_mic %>%
+  filter(id_ha_yr >= 1 | id_ha_yr <= -1)
 
 # MACC
+social_cost_of_carbon <- 0 # setting a cost for social carbon 
 
-full_macc <- data_not_mic %>%
-  ggmacc(abatement = ranking, mac = id_ha_yr, fill = subtype, cost_threshold = social_cost_of_carbon,
+full_macc <- data_without_small_values %>%
+  ggmacc(abatement = ranking, mac = id_ha_yr, 
+         fill = impact,
+         cost_threshold = social_cost_of_carbon,
          zero_line = TRUE, threshold_line = TRUE) +
   scale_x_continuous(labels = scales::number_format()) +
-  scale_fill_manual(values = birds) +
-  labs(fill = "Impact",
-       x = expression("Abatement (tonnes CO"[2]*"-eq)"),
-       y = expression("Marginal abatement cost (GBP tonne CO"[2]*"-eq"^{-1}*")")
+  labs(
+    # fill = "Country",
+       y = expression("Monetary Value (id$ ha"^{-1}*"yr"^{-1}*")"),
+       fill = ""
+       ) +
+  scale_fill_manual(values = impacts,
+                    # labels = c("Australia", "New Zealand", "United Kingdom")
   ) +
-  theme_classic()
+  theme_classic() +
+  theme(axis.text.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.ticks.x = element_blank()) 
+
+full_macc 
+
+# improvements on this graph:
+# 1. find a way to separate the bars with black contour 
+# 2. put labels for each of the subtypes 
 
 
 
+### 2.4. Does stocking rate impact affect externalities value? ----
+
+data_stocking <- data_not_mic %>%
+  filter(! is.na(stocking_rate_sheep_ha) | ! is.na(stocking_rate_sheep_ha.1) ) # 23 rows so 23 values left 
+
+data_stocking_filtered <- data_stocking %>%
+  mutate(
+    stocking_rate_mean = ifelse(is.na(stocking_rate_sheep_ha.1),
+                                stocking_rate_sheep_ha,
+                                (stocking_rate_sheep_ha + stocking_rate_sheep_ha.1) / 2),
+    uncertainty = ifelse(is.na(stocking_rate_sheep_ha.1),
+                         abs(stocking_rate_mean - stocking_rate_sheep_ha),
+                         abs(stocking_rate_mean - stocking_rate_sheep_ha.1) / 2)
+  )
+
+ggplot(data_stocking_filtered, aes(x = country, y = stocking_rate_mean)) +
+  geom_boxplot(
+    #aes(ymin = lower, ymax = upper), width = 0.5, fill = "lightblue"
+    ) +
+  geom_point(position = position_jitter(width = 0.2), color = "blue") +  # Add jittered points
+  labs(x = "Country", y = "Stocking Rate", title = "Stocking Rate with Uncertainty per Country") +
+  theme_minimal()
+
+# testing for normality 
+hist(data_stocking_filtered$stocking_rate_mean) # not normal 
+
+kruskal.test(stocking_rate_mean ~ country, data = data_stocking_filtered)
+# Kruskal-Wallis chi-squared = 14.822, df = 2, p-value = 0.0006045
+
+# Perform Dunn's test with Bonferroni correction
+pairwise.wilcox.test(data_stocking_filtered$stocking_rate_mean, data_stocking_filtered$country, p.adjust.method = "bonferroni")
+# australia nz    
+# nz 0.0028    -     
+#   uk 0.6636    0.0087
+# Warning messages:
+#   1: In wilcox.test.default(xi, xj, paired = paired, ...) :
+#   cannot compute exact p-value with ties
+# 2: In wilcox.test.default(xi, xj, paired = paired, ...) :
+#   cannot compute exact p-value with ties
+# 3: In wilcox.test.default(xi, xj, paired = paired, ...) :
+#   cannot compute exact p-value with ties
+
+# Spearman rank correlation test overall 
+sp_test_stocking <- cor.test(data_stocking_filtered$id_ha_yr, data_stocking_filtered$stocking_rate_mean, method = "spearman")
+# Warning message:
+#   In cor.test.default(data_stocking_filtered$id_ha_yr, data_stocking_filtered$stocking_rate_mean,  :
+#                         Cannot compute exact p-value with ties
+sp_test_stocking
+# S = 2139.9, p-value = 0.7953
+# alternative hypothesis: true rho is not equal to 0
+# sample estimates:
+#   rho 
+# -0.05724928 
+
+# Spearman rank test per country 
+p_values <- data_stocking_filtered %>%
+  group_by(country) %>%
+  summarize(p.value = cor.test(stocking_rate_mean, id_ha_yr, method = "spearman")$p.value)
+
+p_values
+# country   p.value
+# <chr>       <dbl>
+#   1 australia  0.307 
+# 2 nz         0.264 
+# 3 uk         0.0269 # uk is significant!!! 
+
+# Plot with trendline for the uk
+# data set with just the UK 
+data_uk <- data_stocking_filtered %>% 
+  filter(country == "uk")
+# plot 
+(ggplot(data_uk, aes(x = stocking_rate_mean, y = id_ha_yr, color = country)) +
+  geom_point(show.legend = FALSE) +  # Add points
+  geom_smooth(method = "lm", se = FALSE, color = "#7A3520") +  # Add trendline
+  labs(x = "Stocking Rate (Mean)",
+       y = "Adjusted id_ha_yr (After adding 1000)") +
+    scale_color_manual(values = countries) +
+    theme_minimal())
+
+# Plot with all the countries 
+ggplot(data_stocking_filtered, aes(x = stocking_rate_mean, y = id_ha_yr, color = country)) +
+  geom_point() +  # Add points with conditional coloring
+  geom_smooth(data = subset(data_stocking_filtered, country == "uk"), 
+              aes(group = 1), 
+              method = "lm", 
+              se = FALSE, 
+              color = "#7A3520") +  # Add trendline for UK
+  labs(x = "Stocking Rate (Mean)",
+       y = "Adjusted id_ha_yr (After adding 1000)",
+       color = "Country") +
+  scale_color_manual(values = countries) +
+  theme_minimal()
 
 
+### 2.5.  Do externalities vary with ecosystem types? - NO ====
+
+# removing NAs
+data_ecosystem <- data_not_mic[complete.cases(data_not_mic$ecosystem), ]
+
+table(data_ecosystem$ecosystem)
+# chenopod_shrublands             dryland             pasture                peat 
+# 2                   1                  22                   6 
+
+# testing for the significance among the ecosystems with the Kruskal-Wallis test 
+kruskal.test(id_ha_yr ~ ecosystem, data = data_ecosystem)
+# Kruskal-Wallis chi-squared = 3.7565, df = 3, p-value = 0.289
+
+# Boxplot of the four ecosystems 
+ggplot(data_ecosystem, aes(x = ecosystem, y = id_ha_yr, fill = ecosystem)) +
+  geom_boxplot() +
+  scale_fill_manual(values = birds) + 
+  geom_jitter(color="black", size=0.4, alpha=0.9) +
+  labs(x = "Ecosystem", y = "id_ha_yr") +
+  theme_minimal()
+
+data_ecosystem_pasture_peatland <- data_ecosystem %>%
+  filter(ecosystem %in% c("pasture", "peat"))
+
+wilcox.test(id_ha_yr ~ ecosystem, data = data_ecosystem_pasture_peatland)
+# W = 49, p-value = 0.3652
+
+#Plot of just pasture and peat 
+ggplot(data_ecosystem_pasture_peatland, aes(x = ecosystem, y = id_ha_yr, fill = ecosystem)) +
+  geom_boxplot() +
+  scale_fill_manual(values = birds) + 
+  geom_jitter(color="black", size=0.4, alpha=0.9) +
+  labs(x = "Ecosystem", y = "id_ha_yr") +
+  theme_minimal()
 

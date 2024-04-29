@@ -58,6 +58,7 @@ location_data <- read.csv("map/nz/location_studies_nz.csv")  # Replace with your
 location_data <- location_data[complete.cases(location_data), ]
 
 
+
 map_nz <- ggplot() +
   geom_sf(data = merged_data, aes(fill = sheep_density_animals_per_km2_farmland)) +
   geom_point(data = location_data, aes(x = long, y = lat), color = "red", size = 3, shape = 18) +  # Location points
@@ -83,14 +84,52 @@ map_nz <- ggplot() +
         axis.title.x = element_blank(),axis.title.y = element_blank(), # removing x and y titles 
         axis.text.x = element_blank(),axis.text.y = element_blank(), # removing the latitudes, longitudes, and degrees on the x and y axis 
         legend.position = "right", # legend on the right 
-        # legend.title = element_text( # customizing the legend title text 
-        #   size = 11, color = "grey10"),
-        # legend.text = element_text(size = 10, color = "grey10"),
+        legend.title = element_text( # customizing the legend title text 
+        size = 11, color = "grey10"),
+        legend.text = element_text(size = 10, color = "grey10"),
         # Making the background white so it's the same as in the rayshader package 
         panel.grid.major = element_line(color = "white"), panel.grid.minor = element_line(color = "white"), # white the background white 
         plot.background = element_rect(fill = "white", color = NA), legend.background = element_rect(fill = "white", color = NA), # white plot and legend background  
         panel.border = element_rect(fill = NA, color = "white"), # white border 
-        plot.margin = unit(c(t = 0, r = 0, b = 0, l = 0), "lines")) # decreasing the white space around the margins 
+        plot.margin = unit(c(t = 0, r = 0, b = 0, l = 0), "lines"))  # decreasing the white space around the margins 
+
+library(ggplot2)
+library(ggmap)
+
+map_nz <- ggplot() +
+  geom_sf(data = merged_data, aes(fill = sheep_density_animals_per_km2_farmland)) +
+  geom_point(data = location_data, aes(x = long, y = lat), color = "red", size = 5, shape = 18) +  # Location points
+  scale_fill_gradient(name = expression("Sheep Density per km" ^ "2" * " of farmland"), 
+                      labels = scales::comma, 
+                      breaks = seq(0, 350, by = 50),
+                      low = "#C1E1C1", high = "darkgreen",
+                      n.breaks = 7) +
+  # Adding scale bar
+  # geom_segment(aes(x = scale_bar_x, y = scale_bar_y, xend = scale_bar_end_x, yend = scale_bar_end_y),
+  #              color = "black", size = 1) +
+  # annotate("text", x = (scale_bar_x + scale_bar_end_x) / 2, y = scale_bar_y - 0.02, 
+  #          label = paste0(scale_bar_length_km, " km"), hjust = 0.5) +  # Add text indicating scale bar length
+  guides(fill = guide_legend(direction = "vertical",
+                             keyheight = unit(3, "mm"), keywidth = unit(3, "mm"),
+                             title.position = "top", label.position = "right",
+                             title.hjust = .5, label.hjust = .5,
+                             ncol = 1,
+                             byrow = FALSE)) +
+  theme_minimal() + 
+  theme(axis.line = element_blank(), 
+        axis.title.x = element_blank(), axis.title.y = element_blank(), 
+        axis.text.x = element_blank(), axis.text.y = element_blank(), 
+        legend.position = "right", 
+        legend.title = element_text(size = 20, color = "grey10"),
+        legend.text = element_text(size = 18, color = "grey10"),
+        panel.grid.major = element_line(color = "white"), panel.grid.minor = element_line(color = "white"), 
+        plot.background = element_rect(fill = "white", color = NA), legend.background = element_rect(fill = "white", color = NA), 
+        panel.border = element_rect(fill = NA, color = "white"), 
+        plot.margin = unit(c(t = 0, r = 0, b = 0, l = 0), "lines"))
+
+map_nz
+
+ggsave("figures/map_nz.png", plot = map_nz, width = 11, height = 12, units = "in", dpi = 300)
 
 
 # Australia Polygon ----
@@ -130,7 +169,7 @@ location_data_aus <- read.csv("map/aus/location_study_aus.csv")
 
 map_aus <- ggplot() +
   geom_sf(data = merged_data_aus, aes(fill = sheep)) +
-  geom_point(data = location_data_aus, aes(x = long, y = lat), color = "red", size = 3, shape = 18) +  # Location points
+  geom_point(data = location_data_aus, aes(x = long, y = lat), color = "red", size = 5, shape = 18) +  # Location points
   scale_fill_gradient(name = expression("Sheep Density per km" ^ "2" * ""), 
                       labels = scales::comma, 
                       breaks = seq(0, 70, by = 20),
@@ -153,6 +192,8 @@ map_aus <- ggplot() +
         axis.title.x = element_blank(),axis.title.y = element_blank(), # removing x and y titles 
         axis.text.x = element_blank(),axis.text.y = element_blank(), # removing the latitudes, longitudes, and degrees on the x and y axis 
         legend.position = "right", # legend on the right 
+        legend.title = element_text(size = 20, color = "grey10"),
+        legend.text = element_text(size = 18, color = "grey10"),
         # legend.title = element_text( # customizing the legend title text 
         #   size = 11, color = "grey10"),
         # legend.text = element_text(size = 10, color = "grey10"),
@@ -161,6 +202,11 @@ map_aus <- ggplot() +
         plot.background = element_rect(fill = "white", color = NA), legend.background = element_rect(fill = "white", color = NA), # white plot and legend background  
         panel.border = element_rect(fill = NA, color = "white"), # white border 
         plot.margin = unit(c(t = 0, r = 0, b = 0, l = 0), "lines")) # decreasing the white space around the margins 
+
+
+map_aus
+
+ggsave("figures/map_aus.png", plot = map_aus, width = 11, height = 12, units = "in", dpi = 300)
 
 
 # UK Polygon ----

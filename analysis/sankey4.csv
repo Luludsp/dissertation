@@ -1,0 +1,31 @@
+﻿source,target,value
+Manure,Earthworm,-128.7804878
+"Defoliation, treading, and excreta ",Earthworm,-95.16
+Irrigation ,Earthworm,-719.175
+"Defoliation, treading, excreta, and fertiliser ",Vegetation diversity ,-590.327628
+"Defoliation, treading, and excreta ",Vegetation diversity ,-407.1894163
+"Hay cutting, grazing, lime, and fertiliser",Vegetation diversity ,-219.57
+Urine,Extractable organic nitrogen,-5.885264
+Urine,Soil alkalinity ,0.05944995
+Urine,Soil solution P,2.38E-11
+"Defoliation, treading, excreta, and fertiliser ",Nitrous oxide emissions,37.436193
+"Defoliation, treading, and excreta ",Nitrous oxide emissions,13.153257
+"Defoliation, treading, and excreta ",Nitrate leaching,7.741223086
+Fertiliser ,Nitrate leaching,0.287230902
+"Defoliation, treading, and excreta ",Phosphate leaching,0.000252368
+Fertiliser ,Phosphate leaching,1.72E-06
+Fertiliser ,Nitrogen nutrient ,-105.55776
+Excreta,Nitrogen nutrient ,-293.216
+"Defoliation, treading, and excreta ",Carbon emissions ,7.779618
+Treading,Carbon emissions ,2.48E-06
+Fertiliser ,"Organic matter
+",-11.56554703
+Fertiliser ,Soil acidification ,243.3045333
+Treading,Soil structure reduction ,344.1176472
+Excreta,Phosphate nutrient ,-33.92648648
+"Defoliation, treading, and excreta ",Carbon sequestration ,-9.46E-08
+Afforestattion,Carbon sequestration ,-189.90504
+Irrigation ,Carbon sequestration ,-1.95E-06
+"Defoliation, treading, excreta, and fertiliser ",Methane sequestration,-1.6132608
+"Defoliation, treading, and excreta ",Runoff ,80.59140932
+Defoliation ,Nitrate nutrient ,-31.75821886
